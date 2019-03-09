@@ -65,19 +65,19 @@ print ("Set azure context to subcription: "+SUBSCRIPTION_ID)
 command = "az account set -s "+ SUBSCRIPTION_ID
 executeCmd (command)
 
-#print ("Creating azure resource group: "+GROUP_NAME)
-#command="az group create --name "+GROUP_NAME+" --location "+AZURE_REGION
-#executeCmd (command)
+print ("Creating azure resource group: "+GROUP_NAME)
+command="az group create --name "+GROUP_NAME+" --location "+AZURE_REGION
+executeCmd (command)
 
-#print("Creating AKS cluster: "+CLUSTER_NAME)
-#command = "az aks create --name "+CLUSTER_NAME+" --resource-group "+GROUP_NAME+" --generate-ssh-keys --node-vm-size "+VM_SIZE+" --node-count "+AKS_NODE_COUNT+" --kubernetes-version 1.10.12"
-#executeCmd (command)
+print("Creating AKS cluster: "+CLUSTER_NAME)
+command = "az aks create --name "+CLUSTER_NAME+" --resource-group "+GROUP_NAME+" --generate-ssh-keys --node-vm-size "+VM_SIZE+" --node-count "+AKS_NODE_COUNT+" --kubernetes-version 1.10.12"
+executeCmd (command)
 
 command = "az aks get-credentials --overwrite-existing --name "+CLUSTER_NAME+" --resource-group "+GROUP_NAME+" --admin"
 executeCmd (command)
 
 print("Creating SQL Big Data cluster:" +CLUSTER_NAME)
-command="mssqlctl cluster create --name "+CLUSTER_NAME
+command="mssqlctl create cluster  "+CLUSTER_NAME
 executeCmd (command)
 
 print("")
