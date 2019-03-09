@@ -16,7 +16,7 @@ DOCKER_EMAIL=申请的信息中的mail     //这是从微软官方试用申请�
 
 4、第一种方法直接创建aks时候就创建一个SQL Bigdata群集，可以使用一个脚本， [部署脚本](/Demo/bigdata/deployment-aks-sqlbigdata.py)
 
- ![01](image\01.jpg)
+ ![01](image/01.jpg)
 
 ```CMD
 SET ACCEPT_EULA=yes
