@@ -1,4 +1,10 @@
-# AKS创建SQL Server大数据群集
+# 03.三月风雨愁断肠，学习大数据特别忧伤——谈谈AKS创建SQL Server大数据群集创建愁断肠
+
+[TOC]
+
+
+
+## 前言
 
 使用AKS创建SQL Server大数据群集有几种方法，由于产品不断的更新，SQL 2019也还没有正式发布，文档也会发生很多错误，在测试SQL Big Data遇到了很多的问题，终于经过几次尝试搞清楚了怎么来创建。 写下来给大家
 
@@ -14,18 +20,92 @@ DOCKER_EMAIL=申请的信息中的mail     //这是从微软官方试用申请�
 
 3、在进行创建的过程中需要使用到此信息。
 
-4、第一种方法直接创建aks时候就创建一个SQL Bigdata群集，可以使用一个脚本， [部署脚本](/Demo/bigdata/deployment-aks-sqlbigdata.py)
+4、第一种方法直接创建aks时候就创建一个SQL Bigdata群集，可以使用一个脚本， [部署脚本](/Demo/bigdata/deployment-aks-sqlbigdata.py)   这个脚本前提是需要之前的blog写的大数据工具，需要安装：
 
- ![01](image/01.jpg)
+- mssqlctl
+- **kubectl**
+- **Azure Data Studio**
+- **SQL Server 2019 扩展** 
+- python3
+
+如何安装参考   [SQL Server 大数据群集 部署（二）工具篇记](SQL Server 大数据群集 部署（二）工具篇记.md) 
+
+5、安装mssqlctl要特别注意，如果以前安装过一定要卸载干净，再进行安装。 如果按照不正常，删除 目录 python\Lib\site-packages 下面mssql相关的所有文件夹
+
+```
+//卸载
+pip3 uninstall mssqlctl
+//安装 mssqlctl最新版
+pip3 install -r  https://private-repo.microsoft.com/python/ctp-2.3/mssqlctl/requirements.txt 
+```
+
+在老版本的 mssqlctl 创建的命令为 mssqlctl create cluster  name 而新版本的应该是 mssqlctl cluster create --name names。因此如果是老版本的msssqlctl一定会失败。
+
+另外此脚本的官方文档是： [deploy-sql-big-data-aks.py](https://raw.githubusercontent.com/Microsoft/sql-server-samples/master/samples/features/sql-big-data-cluster/deployment/aks/deploy-sql-big-data-aks.py) 但是官方文档没有及时更新其中有两个错误。需要修改才能运行
+
+```
+1、在DOCKER_PASSWORD 下面加入参数：
+DOCKER_EMAIL=""    //这是从微软官方试用申请的试用提供的mail
+2、在os.environ['DOCKER_EMAIL']=DOCKER_USERNAME
+更改为
+os.environ['DOCKER_EMAIL']=DOCKER_EMAIL
+
+
+```
+
+5、另外还有一个非常重要的提示
+
+**默认值Standard_L4s机大小不一定在每个 Azure 区域中可用。 如果您选择不同的计算机大小，请确保在群集中节点之间可以附加的磁盘总数大于或等于 24。 在群集中的每个永久性卷声明需要附加的磁盘。 目前，大数据群集需要 24 永久性卷声明。 例如， Standard_L4s计算机大小支持 16 个附加的磁盘，因此，三个节点表示可附加 48 磁盘。**
+
+**之前由于选择了小的机器，一直失败，后来才发现有这样的限制。**
+
+
+
+## AKS+BigData一起安装过程
+
+1、使用命令
+
+```
+python deployment-aks-sqlbigdata.py
+```
+
+安装过程如下图所示： 这是开始安装aks群集![01](image/01.jpg)
+
+这是在安装SQL Big Data群集
+
+![02](image/02.jpg)
+
+AKS目前打开Dashboard会报错，下载此文件[dashboard-rbac.yml](/Demo/bigdata/dashboard-rbac.yml)  执行下面代码 
+
+```
+
+kubectl create -f dashboard-rbac.yml
+
+```
+
+
+
+## AKS安装完成后再创建SQL BigData群集
+
+ 如果先按照了AKS 之后再穿件群集可以通过mssqlctl创建。
+
+```CMD
+//下面命令获取认证配置
+az aks get-credentials --resource-group AKSSQL --name sqlbigdata
+//打开dashboard
+az aks browse --resource-group AKSSQL --name sqlbigdata
+```
+
+创建之前可以先设定环境变量，将相应需要的参数加上。 
 
 ```CMD
 SET ACCEPT_EULA=yes
 SET CLUSTER_PLATFORM=aks
 
 SET CONTROLLER_USERNAME=max
-SET CONTROLLER_PASSWORD=abc@1234
-SET KNOX_PASSWORD=abc@1234
-SET MSSQL_SA_PASSWORD=abc@1234
+SET CONTROLLER_PASSWORD=   //控制器密码
+SET KNOX_PASSWORD=         //门户密码
+SET MSSQL_SA_PASSWORD=     //数据库密码
 
 SET DOCKER_REGISTRY=private-repo.microsoft.com
 SET DOCKER_REPOSITORY=mssql-private-preview
@@ -33,10 +113,47 @@ SET DOCKER_USERNAME=微软申请的用户名   //这里是从微软的官方试�
 SET DOCKER_PASSWORD=密码			   //这是从微软官方试用申请的试用提供的密码
 SET DOCKER_PRIVATE_REGISTRY="1" 
 SET DOCKER_EMAIL=申请的信息中的mail     //这是从微软官方试用申请的试用提供的mail
-
-mssqlctl create cluster sqlbigdata
+使用命令创建
+mssqlctl cluster create --name sqlbigdata
 ```
 
 
 
-  
+  创建的过程如
+
+![02](image/02.jpg)
+
+时间大概要用20分钟。
+
+## 创建完成后预览
+
+创建完成后，通过dashboard可以看到的情况如下：
+
+```
+az aks browse --resource-group AKSSQL --name sqlbigdata
+可以打开dashboard的情况
+```
+
+概览
+
+![02](image/03.jpg)
+
+
+
+![02](image/03.png)
+
+![02](image/04.png)
+
+![02](image/05.png)
+
+![02](image/06.png)
+
+![02](image/07.png)
+
+
+
+**从创建的资源中可以看到创建了24个存储卷。** 这是很重要的资源。因此在虚拟机选择的时候必须能够挂接24个磁盘一样才行。
+
+
+
+ 

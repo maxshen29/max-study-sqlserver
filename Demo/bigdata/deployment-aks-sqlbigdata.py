@@ -22,17 +22,16 @@ def executeCmd (cmd):
 #
 # MUST INPUT THESE VALUES!!!!!
 #
-SUBSCRIPTION_ID =" "
-GROUP_NAME =" "
-DOCKER_USERNAME =" "
-DOCKER_PASSWORD  = " "
-DOCKER_EMAIL=" "
+SUBSCRIPTION_ID = input("Provide your Azure subscription ID:")
+GROUP_NAME = input("Provide Azure resource group name to be created:")
+DOCKER_USERNAME = input("Provide your Docker username:")
+DOCKER_PASSWORD  = getpass.getpass("Provide your Docker password:")
 
 #
 # Optionally change these configuration settings
 #
 AZURE_REGION=input("Provide Azure region - Press ENTER for using `westus`:") or "westus"
-VM_SIZE=input("Provide VM size for the AKS cluster - Press ENTER for using  `Standard_L4s`:") or "Standard_B2ms"
+VM_SIZE=input("Provide VM size for the AKS cluster - Press ENTER for using  `Standard_L4s`:") or "Standard_L4s"
 AKS_NODE_COUNT=input("Provide number of worker nodes for AKS cluster - Press ENTER for using  `3`:") or "3"
 #This is both Kubernetes cluster name and SQL Big Data cluster name
 CLUSTER_NAME=input("Provide name of AKS cluster and SQL big data cluster - Press ENTER for using  `sqlbigdata`:") or "sqlbigdata"
@@ -54,7 +53,7 @@ os.environ['DOCKER_REGISTRY'] = DOCKER_REGISTRY
 os.environ['DOCKER_REPOSITORY'] = DOCKER_REPOSITORY
 os.environ['DOCKER_USERNAME']=DOCKER_USERNAME
 os.environ['DOCKER_PASSWORD']=DOCKER_PASSWORD
-os.environ['DOCKER_EMAIL']=DOCKER_EMAIL
+os.environ['DOCKER_EMAIL']=DOCKER_USERNAME
 os.environ['DOCKER_IMAGE_TAG']=DOCKER_IMAGE_TAG
 os.environ['DOCKER_IMAGE_POLICY']="IfNotPresent"
 os.environ['DOCKER_PRIVATE_REGISTRY']="1"
@@ -77,7 +76,7 @@ command = "az aks get-credentials --overwrite-existing --name "+CLUSTER_NAME+" -
 executeCmd (command)
 
 print("Creating SQL Big Data cluster:" +CLUSTER_NAME)
-command="mssqlctl create cluster  "+CLUSTER_NAME
+command="mssqlctl cluster create --name "+CLUSTER_NAME
 executeCmd (command)
 
 print("")
