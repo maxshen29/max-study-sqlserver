@@ -87,7 +87,7 @@ kubectl create -f dashboard-rbac.yml
 
 ## AKS安装完成后再创建SQL BigData群集
 
- 如果先按照了AKS 之后再穿件群集可以通过mssqlctl创建。
+ 如果先按照了AKS 之后再创建群集可以通过mssqlctl创建。
 
 ```CMD
 //下面命令获取认证配置
